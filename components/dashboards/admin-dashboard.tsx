@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Users,
   BookOpen,
@@ -20,8 +21,11 @@ import {
   Crown,
   TrendingUp,
   Activity,
+  Download,
 } from "lucide-react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import { BulkUserUpload } from "@/components/admin/bulk-user-upload"
+import { SingleUserForm } from "@/components/admin/single-user-form"
 
 export function AdminDashboard() {
   const [users] = useState([
@@ -90,6 +94,8 @@ export function AdminDashboard() {
     },
   ])
 
+  const [activeTab, setActiveTab] = useState("overview")
+
   const sidebarItems = [
     { icon: Activity, label: "Dashboard", href: "/admin/dashboard", active: true },
     { icon: Users, label: "Users", href: "/admin/users" },
@@ -137,182 +143,281 @@ export function AdminDashboard() {
     }
   }
 
+  const downloadSampleCSV = () => {
+    const sampleData = [
+      ["name", "email", "role", "phone", "cnic", "fatherName", "address", "dateOfBirth", "program"],
+      [
+        "Muhammad Ahmad Khan",
+        "ahmad.khan@student.dyalsingh.edu.pk",
+        "student",
+        "+92-300-1234567",
+        "37405-1234567-1",
+        "Abdul Rahman Khan",
+        "House No. 123, Street 5, Satellite Town, Gujranwala",
+        "2003-03-15",
+        "BS-CS",
+      ],
+      [
+        "Dr. Muhammad Tariq",
+        "tariq@dyalsingh.edu.pk",
+        "teacher",
+        "+92-302-1234567",
+        "37405-2345678-2",
+        "",
+        "Model Town, Gujranwala",
+        "1980-05-20",
+        "",
+      ],
+      [
+        "Fatima Shahid",
+        "fatima@student.dyalsingh.edu.pk",
+        "student",
+        "+92-301-2345678",
+        "37405-3456789-3",
+        "Muhammad Shahid Ali",
+        "Block B, Model Town, Gujranwala",
+        "2003-07-22",
+        "BS-MATH",
+      ],
+    ]
+
+    const csvContent = sampleData.map((row) => row.join(",")).join("\n")
+    const blob = new Blob([csvContent], { type: "text/csv" })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "sample_users.csv"
+    a.click()
+    window.URL.revokeObjectURL(url)
+  }
+
   return (
     <DashboardLayout sidebarItems={sidebarItems} title="Admin Dashboard">
       <div className="space-y-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="lms-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-[rgb(var(--text-secondary))]">Total Users</p>
-                  <p className="text-2xl font-bold text-[rgb(var(--text-primary))]">1,247</p>
-                  <p className="text-xs text-green-600">+12% from last month</p>
-                </div>
-                <Users className="w-8 h-8 text-[rgb(var(--text-accent))]" />
-              </div>
-            </CardContent>
-          </Card>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="users">User Management</TabsTrigger>
+            <TabsTrigger value="bulk-upload">Bulk Upload</TabsTrigger>
+            <TabsTrigger value="add-user">Add User</TabsTrigger>
+          </TabsList>
 
-          <Card className="lms-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-[rgb(var(--text-secondary))]">Active Courses</p>
-                  <p className="text-2xl font-bold text-[rgb(var(--text-primary))]">89</p>
-                  <p className="text-xs text-green-600">+5% from last month</p>
-                </div>
-                <BookOpen className="w-8 h-8 text-[rgb(var(--text-accent))]" />
-              </div>
-            </CardContent>
-          </Card>
+          <TabsContent value="overview" className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="lms-card">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-[rgb(var(--text-secondary))]">Total Users</p>
+                      <p className="text-2xl font-bold text-[rgb(var(--text-primary))]">1,247</p>
+                      <p className="text-xs text-green-600">+12% from last month</p>
+                    </div>
+                    <Users className="w-8 h-8 text-[rgb(var(--text-accent))]" />
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Card className="lms-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-[rgb(var(--text-secondary))]">Teachers</p>
-                  <p className="text-2xl font-bold text-[rgb(var(--text-primary))]">47</p>
-                  <p className="text-xs text-blue-600">+3 new this month</p>
-                </div>
-                <ShieldCheck className="w-8 h-8 text-[rgb(var(--text-accent))]" />
-              </div>
-            </CardContent>
-          </Card>
+              <Card className="lms-card">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-[rgb(var(--text-secondary))]">Active Courses</p>
+                      <p className="text-2xl font-bold text-[rgb(var(--text-primary))]">89</p>
+                      <p className="text-xs text-green-600">+5% from last month</p>
+                    </div>
+                    <BookOpen className="w-8 h-8 text-[rgb(var(--text-accent))]" />
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Card className="lms-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-[rgb(var(--text-secondary))]">Students</p>
-                  <p className="text-2xl font-bold text-[rgb(var(--text-primary))]">1,200</p>
-                  <p className="text-xs text-green-600">+8% from last month</p>
-                </div>
-                <TrendingUp className="w-8 h-8 text-[rgb(var(--text-accent))]" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              <Card className="lms-card">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-[rgb(var(--text-secondary))]">Teachers</p>
+                      <p className="text-2xl font-bold text-[rgb(var(--text-primary))]">47</p>
+                      <p className="text-xs text-blue-600">+3 new this month</p>
+                    </div>
+                    <ShieldCheck className="w-8 h-8 text-[rgb(var(--text-accent))]" />
+                  </div>
+                </CardContent>
+              </Card>
 
-        {/* User Management */}
-        <Card className="lms-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-[rgb(var(--text-primary))]">User Management</CardTitle>
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[rgb(var(--text-secondary))]" />
-                <Input placeholder="Search users..." className="pl-10 w-64" />
-              </div>
-              <Button className="lms-button-primary rounded-xl">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Add User
-              </Button>
+              <Card className="lms-card">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-[rgb(var(--text-secondary))]">Students</p>
+                      <p className="text-2xl font-bold text-[rgb(var(--text-primary))]">1,200</p>
+                      <p className="text-xs text-green-600">+8% from last month</p>
+                    </div>
+                    <TrendingUp className="w-8 h-8 text-[rgb(var(--text-accent))]" />
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead>Courses</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium text-[rgb(var(--text-primary))]">{user.name}</TableCell>
-                    <TableCell className="text-[rgb(var(--text-secondary))]">{user.email}</TableCell>
-                    <TableCell>
-                      <Badge className={`${getRoleColor(user.role)} flex items-center space-x-1 w-fit`}>
-                        {getRoleIcon(user.role)}
-                        <span>{user.role}</span>
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(user.status)}>{user.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-[rgb(var(--text-secondary))]">{user.lastLogin}</TableCell>
-                    <TableCell className="text-[rgb(var(--text-secondary))]">{user.courses}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Edit User</DropdownMenuItem>
-                          <DropdownMenuItem>Change Role</DropdownMenuItem>
-                          <DropdownMenuItem>View Profile</DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">
-                            {user.status === "active" ? "Suspend" : "Activate"}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
 
-        {/* Course Statistics */}
-        <Card className="lms-card">
-          <CardHeader>
-            <CardTitle className="text-[rgb(var(--text-primary))]">Course Statistics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Course Title</TableHead>
-                  <TableHead>Instructor</TableHead>
-                  <TableHead>Students</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {courses.map((course) => (
-                  <TableRow key={course.id}>
-                    <TableCell className="font-medium text-[rgb(var(--text-primary))]">{course.title}</TableCell>
-                    <TableCell className="text-[rgb(var(--text-secondary))]">{course.instructor}</TableCell>
-                    <TableCell className="text-[rgb(var(--text-secondary))]">{course.students}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(course.status)}>{course.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-[rgb(var(--text-secondary))]">
-                      {new Date(course.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View Course</DropdownMenuItem>
-                          <DropdownMenuItem>Edit Course</DropdownMenuItem>
-                          <DropdownMenuItem>View Analytics</DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">Delete Course</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+            {/* Course Statistics */}
+            <Card className="lms-card">
+              <CardHeader>
+                <CardTitle className="text-[rgb(var(--text-primary))]">Course Statistics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Course Title</TableHead>
+                      <TableHead>Instructor</TableHead>
+                      <TableHead>Students</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {courses.map((course) => (
+                      <TableRow key={course.id}>
+                        <TableCell className="font-medium text-[rgb(var(--text-primary))]">{course.title}</TableCell>
+                        <TableCell className="text-[rgb(var(--text-secondary))]">{course.instructor}</TableCell>
+                        <TableCell className="text-[rgb(var(--text-secondary))]">{course.students}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(course.status)}>{course.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-[rgb(var(--text-secondary))]">
+                          {new Date(course.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>View Course</DropdownMenuItem>
+                              <DropdownMenuItem>Edit Course</DropdownMenuItem>
+                              <DropdownMenuItem>View Analytics</DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-600">Delete Course</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-6">
+            {/* User Management */}
+            <Card className="lms-card">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-[rgb(var(--text-primary))]">User Management</CardTitle>
+                <div className="flex items-center space-x-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[rgb(var(--text-secondary))]" />
+                    <Input placeholder="Search users..." className="pl-10 w-64" />
+                  </div>
+                  <Button className="lms-button-primary rounded-xl" onClick={() => setActiveTab("add-user")}>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Add User
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Last Login</TableHead>
+                      <TableHead>Courses</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium text-[rgb(var(--text-primary))]">{user.name}</TableCell>
+                        <TableCell className="text-[rgb(var(--text-secondary))]">{user.email}</TableCell>
+                        <TableCell>
+                          <Badge className={`${getRoleColor(user.role)} flex items-center space-x-1 w-fit`}>
+                            {getRoleIcon(user.role)}
+                            <span>{user.role}</span>
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(user.status)}>{user.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-[rgb(var(--text-secondary))]">{user.lastLogin}</TableCell>
+                        <TableCell className="text-[rgb(var(--text-secondary))]">{user.courses}</TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>Edit User</DropdownMenuItem>
+                              <DropdownMenuItem>Change Role</DropdownMenuItem>
+                              <DropdownMenuItem>View Profile</DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-600">
+                                {user.status === "active" ? "Suspend" : "Activate"}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="bulk-upload" className="space-y-6">
+            <Card className="lms-card">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-[rgb(var(--text-primary))]">Bulk User Upload</CardTitle>
+                  <p className="text-sm text-[rgb(var(--text-secondary))] mt-1">
+                    Upload multiple users at once using a CSV file
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={downloadSampleCSV}
+                  className="flex items-center space-x-2 bg-transparent"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download Sample CSV</span>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <BulkUserUpload />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="add-user" className="space-y-6">
+            <Card className="lms-card">
+              <CardHeader>
+                <CardTitle className="text-[rgb(var(--text-primary))]">Add New User</CardTitle>
+                <p className="text-sm text-[rgb(var(--text-secondary))]">
+                  Create a new user account for student, teacher, or admin
+                </p>
+              </CardHeader>
+              <CardContent>
+                <SingleUserForm />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   )
