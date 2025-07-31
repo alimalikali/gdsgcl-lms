@@ -4,12 +4,13 @@ import { FeaturesSection } from "@/components/sections/features-section"
 import { TestimonialsSection } from "@/components/sections/testimonials-section"
 import { FAQSection } from "@/components/sections/faq-section"
 import { CTASection } from "@/components/sections/cta-section"
+import { ClientOnly } from "@/components/ui/client-only"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 
 export default function Home() {
   return (
-    <>
+    <ClientOnly>
       <Header />
       <HeroSection />
       <StatsSection />
@@ -18,6 +19,6 @@ export default function Home() {
       <FAQSection />
       <CTASection />
       <Footer />
-    </>
+    </ClientOnly>
   )
 }

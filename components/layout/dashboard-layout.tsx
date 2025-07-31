@@ -46,6 +46,17 @@ export function DashboardLayout({ children, sidebarItems, title }: DashboardLayo
     }
   }, [router])
 
+  // Prevent hydration mismatch by not rendering until mounted
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
+
   const handleLogout = () => {
     localStorage.removeItem("user")
     router.push("/")
