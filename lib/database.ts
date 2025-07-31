@@ -129,24 +129,6 @@ export interface Lecture {
   completed: boolean
 }
 
-// Bulk User Interface
-export interface BulkUser {
-  name: string
-  email: string
-  role: "student" | "teacher" | "admin"
-  phone?: string
-  cnic?: string
-  fatherName?: string
-  address?: string
-  dateOfBirth?: string
-  program?: string
-  designation?: string
-  department?: string
-  qualification?: string
-  specialization?: string
-  experience?: number
-}
-
 // Mock Database
 export const mockDatabase = {
   // Programs offered at Dyal Singh College
@@ -785,84 +767,5 @@ export class DatabaseService {
       program,
       semesterData,
     }
-  }
-
-  // Bulk user operations
-  static async bulkCreateUsers(users: BulkUser[]): Promise<{ success: number; failed: number; errors: string[] }> {
-    let success = 0
-    let failed = 0
-    const errors: string[] = []
-
-    for (const user of users) {
-      try {
-        if (user.role === "student") {
-          const newStudent: Student = {
-            id: `std_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            rollNumber: this.generateRollNumber(user.program || "BS-CS"),
-            name: user.name,
-            fatherName: user.fatherName || "",
-            cnic: user.cnic || "",
-            email: user.email,
-            phone: user.phone || "",
-            address: user.address || "",
-            dateOfBirth: user.dateOfBirth || "",
-            admissionDate: new Date().toISOString().split("T")[0],
-            programId: this.getProgramIdByName(user.program || "BS Computer Science"),
-            currentSemester: 1,
-            status: "active",
-            cgpa: 0,
-            totalCredits: 0,
-            completedCredits: 0,
-          }
-          mockDatabase.students.push(newStudent)
-        } else if (user.role === "teacher") {
-          const newTeacher: Teacher = {
-            id: `tch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            employeeId: this.generateEmployeeId(user.department || "CS"),
-            name: user.name,
-            designation: user.designation || "Lecturer",
-            department: user.department || "Computer Science",
-            qualification: user.qualification || "",
-            email: user.email,
-            phone: user.phone || "",
-            specialization: user.specialization ? user.specialization.split(",").map((s) => s.trim()) : [],
-            experience: user.experience || 0,
-          }
-          mockDatabase.teachers.push(newTeacher)
-        }
-        success++
-      } catch (error) {
-        failed++
-        errors.push(`Failed to create user ${user.name}: ${error}`)
-      }
-    }
-
-    return { success, failed, errors }
-  }
-
-  static generateRollNumber(program: string): string {
-    const year = new Date().getFullYear()
-    const programCode = program.toUpperCase().replace(/\s+/g, "-")
-    const sequence = Math.floor(Math.random() * 1000)
-      .toString()
-      .padStart(3, "0")
-    return `${programCode}-${year}-${sequence}`
-  }
-
-  static generateEmployeeId(department: string): string {
-    const deptCode = department.toUpperCase().substring(0, 3)
-    const sequence = Math.floor(Math.random() * 1000)
-      .toString()
-      .padStart(3, "0")
-    return `GDSGC-${deptCode}-${sequence}`
-  }
-
-  static getProgramIdByName(programName: string): string {
-    const program = mockDatabase.programs.find(
-      (p) =>
-        p.name.toLowerCase().includes(programName.toLowerCase()) ||
-        programName.toLowerCase().includes(p.name.toLowerCase()),
-    )
-    return program?.id || "prog_001"
   }
 }
